@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "933296166185",
+    "firebase_url": "https://wifiguard-ecb9b-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "wifiguard-ecb9b",
+    "storage_bucket": "wifiguard-ecb9b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:933296166185:android:06466174a05cf0c1a91338",
+        "android_client_info": {
+          "package_name": "com.cadt.wifiguard"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCp0wpW8jbDQSYw9uY5F9qH-9PE6m1cY3A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
