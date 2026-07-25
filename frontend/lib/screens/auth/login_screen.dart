@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../providers/auth_provider.dart';
+import 'register_screen.dart';
+import '../home/home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -12,8 +16,40 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController passwordController = TextEditingController();
   bool isPasswordVisible = false;
 
+  // returns which eye icon to show for the password field
+  IconData getPasswordIcon() {
+    if (isPasswordVisible == true) {
+      return Icons.visibility;
+    } else {
+      return Icons.visibility_off;
+    }
+  }
+
+  // returns spinner while loading, otherwise the button text
+  Widget buildLoginButtonChild(bool isLoading) {
+    if (isLoading == true) {
+      return const SizedBox(
+        width: 20,
+        height: 20,
+        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+      );
+    } else {
+      return const Text(
+        "Login",
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    // watch the provider so this screen rebuilds when isLoading changes
+    AuthProvider authProvider = Provider.of<AuthProvider>(context);
+
     return Scaffold(
       backgroundColor: const Color(0xFF0D0710),
       body: SafeArea(
@@ -108,12 +144,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           color: Colors.grey,
                         ),
                         suffixIcon: IconButton(
-                          icon: Icon(
-                            isPasswordVisible
-                                ? Icons.visibility
-                                : Icons.visibility_off,
-                            color: Colors.grey,
-                          ),
+                          icon: Icon(getPasswordIcon(), color: Colors.grey),
                           onPressed: () {
                             if (isPasswordVisible == true) {
                               setState(() {
@@ -135,6 +166,18 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
 
+                    // show error message if login failed
+                    if (authProvider.errorMessage != null) ...[
+                      const SizedBox(height: 10),
+                      Text(
+                        authProvider.errorMessage!,
+                        style: const TextStyle(
+                          color: Colors.redAccent,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+
                     const SizedBox(height: 20),
                     SizedBox(
                       width: double.infinity,
@@ -148,9 +191,23 @@ class _LoginScreenState extends State<LoginScreen> {
                             borderRadius: BorderRadius.circular(30),
                           ),
                         ),
-                        onPressed: () {
-                          print(emailController.text);
-                          print(passwordController.text);
+                        onPressed: () async {
+                          // call the provider instead of Firebase directly
+                          bool success = await authProvider.login(
+                            emailController.text,
+                            passwordController.text,
+                          );
+
+                          if (success == true) {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const HomeScreen(),
+                              ),
+                            );
+                          }
+                          // if not success, errorMessage is already set
+                          // and the screen rebuilds to show it
                         },
                         child: Ink(
                           decoration: BoxDecoration(
@@ -161,13 +218,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           child: Container(
                             alignment: Alignment.center,
-                            child: const Text(
-                              "Login",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            child: buildLoginButtonChild(
+                              authProvider.isLoading,
                             ),
                           ),
                         ),
@@ -187,7 +239,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      print("go to register screen");
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const RegisterScreen(),
+                        ),
+                      );
                     },
                     child: const Text(
                       "Register",
