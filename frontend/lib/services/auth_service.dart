@@ -26,6 +26,22 @@ class AuthService {
 
       // Save user profile in Firestore
       await _firestore.collection('users').doc(uid).set(newUser.toMap());
+    }  on FirebaseAuthException catch (e) {
+      print("========== FIREBASE AUTH ERROR ==========");
+      print("Code: ${e.code}");
+      print("Message: ${e.message}");
+      print("=========================================");
+
+
+      throw Exception("${e.code}: ${e.message}");
+      
+    } on FirebaseException catch (e) {
+      print("========== FIRESTORE ERROR ==========");
+      print("Code: ${e.code}");
+      print("Message: ${e.message}");
+      print("====================================");
+
+      throw Exception("${e.code}: ${e.message}");
     } on FirebaseAuthException catch (e) {
       throw Exception(e.message);
     }
