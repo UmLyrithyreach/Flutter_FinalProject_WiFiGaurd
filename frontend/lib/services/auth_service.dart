@@ -42,6 +42,8 @@ class AuthService {
       print("====================================");
 
       throw Exception("${e.code}: ${e.message}");
+    } on FirebaseAuthException catch (e) {
+      throw Exception(e.message);
     }
   }
 
