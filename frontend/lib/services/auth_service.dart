@@ -1,37 +1,52 @@
-// this is just a temporary version so login/register work for now
-// friend will change the inside of these functions to use real Firebase
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models/user_model.dart';
 
 class AuthService {
-  Future<String?> login(String email, String password) async {
-    await Future.delayed(const Duration(seconds: 1));
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-    if (email.isEmpty || password.isEmpty) {
-      return "Please fill in both fields";
+  Future<void> register(UserModel user, String password) async {
+    try {
+      UserCredential userCredential = await _auth
+          .createUserWithEmailAndPassword(
+            email: user.email,
+            password: password,
+          );
+
+      String uid = userCredential.user!.uid;
+
+      UserModel newUser = UserModel(
+        uid: uid,
+        email: user.email,
+        username: user.username,
+      );
+
+      await _firestore.collection('users').doc(uid).set(newUser.toMap());
+    } on FirebaseAuthException catch (e) {
+      throw Exception("${e.code}: ${e.message}");
+    } on FirebaseException catch (e) {
+      throw Exception("${e.code}: ${e.message}");
     }
-
-    // friend: put FirebaseAuth signInWithEmailAndPassword here later
-
-    return null;
   }
 
-  Future<String?> register(
-    String fullName,
-    String email,
-    String password,
-  ) async {
-    await Future.delayed(const Duration(seconds: 1));
-
-    if (fullName.isEmpty || email.isEmpty || password.isEmpty) {
-      return "Please fill in all fields";
+  Future<User?> login(String email, String password) async {
+    try {
+      UserCredential credential = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      return credential.user;
+    } on FirebaseAuthException catch (e) {
+      throw Exception(e.message);
     }
-
-    // friend: put FirebaseAuth createUserWithEmailAndPassword here later
-
-    return null;
   }
 
   Future<void> logout() async {
-    // friend: put FirebaseAuth signOut here later
-    await Future.delayed(const Duration(milliseconds: 500));
+    await _auth.signOut();
+  }
+
+  User? getCurrentUser() {
+    return _auth.currentUser;
   }
 }

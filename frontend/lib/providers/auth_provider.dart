@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../models/user_model.dart';
 import '../services/auth_service.dart';
 
 class AuthProvider extends ChangeNotifier {
@@ -14,17 +15,16 @@ class AuthProvider extends ChangeNotifier {
     errorMessage = null;
     notifyListeners();
 
-    String? error = await authService.login(email, password);
-
-    if (error == null) {
+    try {
+      await authService.login(email, password);
       isLoggedIn = true;
       isLoading = false;
       notifyListeners();
       return true;
-    } else {
+    } catch (e) {
       isLoggedIn = false;
       isLoading = false;
-      errorMessage = error;
+      errorMessage = e.toString();
       notifyListeners();
       return false;
     }
@@ -36,17 +36,17 @@ class AuthProvider extends ChangeNotifier {
     errorMessage = null;
     notifyListeners();
 
-    String? error = await authService.register(fullName, email, password);
-
-    if (error == null) {
+    try {
+      UserModel newUser = UserModel(uid: '', email: email, username: fullName);
+      await authService.register(newUser, password);
       isLoggedIn = true;
       isLoading = false;
       notifyListeners();
       return true;
-    } else {
+    } catch (e) {
       isLoggedIn = false;
       isLoading = false;
-      errorMessage = error;
+      errorMessage = e.toString();
       notifyListeners();
       return false;
     }
