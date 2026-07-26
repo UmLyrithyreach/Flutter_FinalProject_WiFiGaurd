@@ -1,6 +1,9 @@
+<<<<<<< HEAD
+=======
 plugins {
     id("com.google.gms.google-services") version "4.4.3" apply false
 }
+>>>>>>> 5ba968746b3df0577cd58189bebfcdc4ae77a7de
 allprojects {
     repositories {
         google()

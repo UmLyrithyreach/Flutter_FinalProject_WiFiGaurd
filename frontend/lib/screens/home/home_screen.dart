@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/services/wifi_scan_service.dart';
-import 'package:wifi_scan/wifi_scan.dart';
-import '/services/location_service.dart';
+import 'package:provider/provider.dart';
+import '../../providers/wifi_provider.dart';
+import '../../models/wifi_network.dart';
+import '../wifi/wifi_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -11,45 +12,73 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  bool isScanning = false;
   int selectedTabIndex = 0;
 
-  // location service
-  final LocationService locationService = LocationService();
-  final WifiScanService wifiScanService = WifiScanService();
+  // this runs after the button is tapped and the provider is done
+  // it decides which popup to show based on what the provider found
+  void handleScanTap(WifiProvider wifiProvider) async {
+    await wifiProvider.scanNetworks();
 
-  // list all the wifi access point
-  List<WiFiAccessPoint> wifiList = [];
-
-  // scan function
-  Future<void> scanWifi() async {
-    // check if location service is on
-    bool enabled = await locationService.isLocationEnabled();
-
-    if (!enabled) {
-      print("Location is OFF");
+    if (wifiProvider.needPermission == true) {
+      showLocationDialog(
+        title: "Enable Location Access",
+        message:
+            "WiFiGuard needs location permission to scan nearby wifi networks.",
+        buttonText: "Enable Location",
+        onPressed: () {
+          Navigator.pop(context);
+          wifiProvider.locationService.requestPermission();
+        },
+      );
       return;
     }
 
-    setState(() {
-      isScanning = true;
-    });
-
-    wifiList = await wifiScanService.scanWifi();
-
-    setState(() {
-      isScanning = false;
-    });
-
-    print("Found ${wifiList.length} networks");
-
-    for (var wifi in wifiList) {
-      print(wifi.ssid);
+    if (wifiProvider.needLocationService == true) {
+      showLocationDialog(
+        title: "Turn On Location Services",
+        message:
+            "Your location permission is on, but the phone's location service is off. Please turn it on to scan.",
+        buttonText: "Open Settings",
+        onPressed: () {
+          Navigator.pop(context);
+          wifiProvider.locationService.openLocationSettings();
+        },
+      );
+      return;
     }
+  }
+
+  void showLocationDialog({
+    required String title,
+    required String message,
+    required String buttonText,
+    required VoidCallback onPressed,
+  }) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF1A1420),
+          title: Text(title, style: const TextStyle(color: Colors.white)),
+          content: Text(message, style: const TextStyle(color: Colors.grey)),
+          actions: [
+            TextButton(
+              onPressed: onPressed,
+              child: Text(
+                buttonText,
+                style: const TextStyle(color: Color(0xFFEC4899)),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    WifiProvider wifiProvider = Provider.of<WifiProvider>(context);
+
     return Scaffold(
       backgroundColor: const Color(0xFF0D0710),
       body: SafeArea(
@@ -59,6 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 10),
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -91,6 +121,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
 
               const SizedBox(height: 20),
+
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(18),
@@ -119,6 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
+
                     SizedBox(
                       width: double.infinity,
                       height: 48,
@@ -131,9 +163,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             borderRadius: BorderRadius.circular(30),
                           ),
                         ),
-                        onPressed: () async {
-                          await scanWifi();
-                          print("scan button pressed");
+                        onPressed: () {
+                          handleScanTap(wifiProvider);
                         },
                         child: Ink(
                           decoration: BoxDecoration(
@@ -144,24 +175,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           child: Container(
                             alignment: Alignment.center,
-                            child: const Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.refresh,
-                                  color: Colors.white,
-                                  size: 18,
-                                ),
-                                SizedBox(width: 8),
-                                Text(
-                                  "Scan Nearby WiFi",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
+                            child: buildScanButtonChild(
+                              wifiProvider.isScanning,
                             ),
                           ),
                         ),
@@ -173,68 +188,27 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(height: 24),
 
-              const Text(
-                "NEARBY NETWORKS",
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 11,
-                  letterSpacing: 1,
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    "NEARBY NETWORKS",
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 11,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                  Text(
+                    "${wifiProvider.networkList.length} found",
+                    style: const TextStyle(color: Colors.grey, fontSize: 11),
+                  ),
+                ],
               ),
 
               const SizedBox(height: 10),
-              Expanded(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SizedBox(
-                        width: 70,
-                        height: 60,
-                        child: Stack(
-                          children: [
-                            const Positioned(
-                              left: 5,
-                              top: 0,
-                              child: Icon(
-                                Icons.wifi,
-                                color: Color(0xFF4A9EFF),
-                                size: 60,
-                              ),
-                            ),
-                            Positioned(
-                              bottom: 2,
-                              right: 2,
-                              child: Container(
-                                width: 22,
-                                height: 22,
-                                decoration: BoxDecoration(
-                                  color: Colors.redAccent,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: const Color(0xFF0D0710),
-                                    width: 2,
-                                  ),
-                                ),
-                                child: const Icon(
-                                  Icons.close,
-                                  color: Colors.white,
-                                  size: 14,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      const Text(
-                        "No WiFi found. Please Scan to see more!",
-                        style: TextStyle(color: Colors.grey, fontSize: 13),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+
+              Expanded(child: buildNetworkArea(wifiProvider)),
             ],
           ),
         ),
@@ -246,7 +220,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            buildNavItem(icon: Icons.wifi, label: "Home", index: 0),
+            buildNavItem(icon: Icons.wifi, label: "Scan", index: 0),
             buildNavItem(icon: Icons.history, label: "History", index: 1),
             buildNavItem(
               icon: Icons.person_outline,
@@ -257,6 +231,142 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  // shows either the empty state or the list of scanned networks
+  Widget buildNetworkArea(WifiProvider wifiProvider) {
+    if (wifiProvider.networkList.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 70,
+              height: 60,
+              child: Stack(
+                children: [
+                  const Positioned(
+                    left: 5,
+                    top: 0,
+                    child: Icon(Icons.wifi, color: Color(0xFF4A9EFF), size: 60),
+                  ),
+                  Positioned(
+                    bottom: 2,
+                    right: 2,
+                    child: Container(
+                      width: 22,
+                      height: 22,
+                      decoration: BoxDecoration(
+                        color: Colors.redAccent,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: const Color(0xFF0D0710),
+                          width: 2,
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.close,
+                        color: Colors.white,
+                        size: 14,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              "No networks detected nearby. Tap scan to search again.",
+              style: TextStyle(color: Colors.grey, fontSize: 13),
+            ),
+          ],
+        ),
+      );
+    } else {
+      return ListView.builder(
+        itemCount: wifiProvider.networkList.length,
+        itemBuilder: (context, index) {
+          WifiNetworkModel network = wifiProvider.networkList[index];
+          return buildNetworkCard(network);
+        },
+      );
+    }
+  }
+
+  Widget buildNetworkCard(WifiNetworkModel network) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => WifiDetailScreen(network: network),
+          ),
+        );
+      },
+      child: buildNetworkCardContent(network),
+    );
+  }
+
+  Widget buildNetworkCardContent(WifiNetworkModel network) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A1420),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.wifi, color: Color(0xFF4A9EFF)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  network.ssid,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  "${network.encryptionType} · ${network.frequency} · ${network.rssi} dBm",
+                  style: const TextStyle(color: Colors.grey, fontSize: 11),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildScanButtonChild(bool isScanning) {
+    if (isScanning == true) {
+      return const SizedBox(
+        width: 20,
+        height: 20,
+        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+      );
+    } else {
+      return const Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.refresh, color: Colors.white, size: 18),
+          SizedBox(width: 8),
+          Text(
+            "Scan Nearby WiFi",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      );
+    }
   }
 
   Widget buildNavItem({
