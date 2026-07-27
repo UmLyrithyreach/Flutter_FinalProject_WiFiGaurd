@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/wifi_network.dart';
 import '../../providers/review_provider.dart';
+import '../../providers/history_provider.dart';
 import '../../widgets/review_card.dart';
 import 'write_review_screen.dart';
 
@@ -23,6 +24,10 @@ class _WifiDetailScreenState extends State<WifiDetailScreen> {
         context,
         listen: false,
       ).loadReviews(widget.network.ssid);
+      Provider.of<HistoryProvider>(
+        context,
+        listen: false,
+      ).addToHistory(widget.network);
     });
   }
 

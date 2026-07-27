@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../../providers/wifi_provider.dart';
 import '../../models/wifi_network.dart';
 import '../wifi/wifi_detail_screen.dart';
+import '../history/history_screen.dart';
+import '../profile/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -221,11 +223,31 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             buildNavItem(icon: Icons.wifi, label: "Scan", index: 0),
-            buildNavItem(icon: Icons.history, label: "History", index: 1),
+            buildNavItem(
+              icon: Icons.history,
+              label: "History",
+              index: 1,
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const HistoryScreen(),
+                  ),
+                );
+              },
+            ),
             buildNavItem(
               icon: Icons.person_outline,
               label: "Profile",
               index: 2,
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ProfileScreen(),
+                  ),
+                );
+              },
             ),
           ],
         ),
@@ -373,15 +395,24 @@ class _HomeScreenState extends State<HomeScreen> {
     required IconData icon,
     required String label,
     required int index,
+    VoidCallback? onTap,
   }) {
     bool isSelected = selectedTabIndex == index;
+
+    void handleTap() {
+      if (onTap == null) {
+        setState(() {
+          selectedTabIndex = index;
+        });
+      } else {
+        onTap();
+      }
+    }
 
     if (isSelected == true) {
       return GestureDetector(
         onTap: () {
-          setState(() {
-            selectedTabIndex = index;
-          });
+          handleTap();
         },
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
@@ -407,9 +438,7 @@ class _HomeScreenState extends State<HomeScreen> {
     } else {
       return GestureDetector(
         onTap: () {
-          setState(() {
-            selectedTabIndex = index;
-          });
+          handleTap();
         },
         child: Column(
           mainAxisSize: MainAxisSize.min,

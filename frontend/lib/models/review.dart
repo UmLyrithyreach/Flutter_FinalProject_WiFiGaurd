@@ -32,6 +32,3 @@ class ReviewModel {
     };
   }
 }
-// this class is just a shape for one review
-// it does not do anything, it only holds data
-
