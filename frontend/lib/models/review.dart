@@ -31,4 +31,15 @@ class ReviewModel {
       'timestamp': timestamp.toIso8601String(),
     };
   }
+  factory ReviewModel.fromMap(Map<String, dynamic> map) {
+  return ReviewModel(
+    reviewId: map['reviewId'],
+    networkSsid: map['networkSsid'],
+    userId: map['userId'],
+    userName: map['userName'],
+    rating: map['rating'],
+    comment: map['comment'],
+    timestamp: DateTime.parse(map['timestamp']),
+  );
+}
 }
