@@ -34,7 +34,7 @@ class WifiProvider extends ChangeNotifier {
       return;
     }
 
-    // Case B: check if gps service is on
+    // Case B: check if GPS service is on
     bool serviceOn = await locationService.isServiceEnabled();
 
     if (serviceOn == false) {
