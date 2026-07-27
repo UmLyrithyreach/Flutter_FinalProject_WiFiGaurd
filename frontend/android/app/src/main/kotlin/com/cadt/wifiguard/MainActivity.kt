@@ -1,4 +1,4 @@
-package com.example.frontend
+package com.cadt.wifiguard
 
 import io.flutter.embedding.android.FlutterActivity
 

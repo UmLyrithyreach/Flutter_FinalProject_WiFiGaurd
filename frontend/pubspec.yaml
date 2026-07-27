@@ -42,7 +42,7 @@ dependencies:
 
   provider: ^6.1.5
   geolocator: ^11.0.0
-  wifi_iot: ^0.3.19
+  wifi_scan: ^0.4.1+2
   permission_handler: ^12.0.1
   
   
