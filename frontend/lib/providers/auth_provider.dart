@@ -3,37 +3,59 @@ import '../models/user_model.dart';
 import '../services/auth_service.dart';
 
 class AuthProvider extends ChangeNotifier {
-  final AuthService _authService = AuthService();
+  final AuthService authService = AuthService();
 
-  bool _isLoading = false;
+  bool isLoggedIn = false;
+  bool isLoading = false;
+  String? errorMessage;
 
-  bool get isLoading => _isLoading;
-
-  Future<void> register(UserModel user, String password) async {
-    _isLoading = true;
+  // called from login_screen.dart when Login button is tapped
+  Future<bool> login(String email, String password) async {
+    isLoading = true;
+    errorMessage = null;
     notifyListeners();
 
     try {
-      await _authService.register(user, password);
-    } finally {
-      _isLoading = false;
+      await authService.login(email, password);
+      isLoggedIn = true;
+      isLoading = false;
       notifyListeners();
+      return true;
+    } catch (e) {
+      isLoggedIn = false;
+      isLoading = false;
+      errorMessage = e.toString();
+      notifyListeners();
+      return false;
     }
   }
 
-  Future<void> login(String email, String password) async {
-    _isLoading = true;
+  // called from register_screen.dart when Create Account button is tapped
+  Future<bool> register(String fullName, String email, String password) async {
+    isLoading = true;
+    errorMessage = null;
     notifyListeners();
 
     try {
-      await _authService.login(email, password);
-    } finally {
-      _isLoading = false;
+      UserModel newUser = UserModel(uid: '', email: email, username: fullName);
+      await authService.register(newUser, password);
+      isLoggedIn = true;
+      isLoading = false;
       notifyListeners();
+      return true;
+    } catch (e) {
+      isLoggedIn = false;
+      isLoading = false;
+      errorMessage = e.toString();
+      notifyListeners();
+      return false;
     }
   }
 
+  // called from profile_screen.dart later
   Future<void> logout() async {
-    await _authService.logout();
+    await authService.logout();
+    isLoggedIn = false;
+    notifyListeners();
   }
 }

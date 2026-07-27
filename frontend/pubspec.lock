@@ -245,6 +245,8 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.0"
+<<<<<<< HEAD
+=======
   geoclue:
     dependency: transitive
     description:
@@ -253,22 +255,37 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.1.1"
+>>>>>>> 0598ea71d6cfe6e98ad11eac5b6a9f73843d2b8e
   geolocator:
     dependency: "direct main"
     description:
       name: geolocator
+<<<<<<< HEAD
+      sha256: "6cb9fb6e5928b58b9a84bdf85012d757fd07aab8215c5205337021c4999bad27"
+      url: "https://pub.dev"
+    source: hosted
+    version: "11.1.0"
+=======
       sha256: e146a6d63776582651e97a79cbe459f8e1211b100101fadcd84db83361fa599f
       url: "https://pub.dev"
     source: hosted
     version: "14.0.3"
+>>>>>>> 0598ea71d6cfe6e98ad11eac5b6a9f73843d2b8e
   geolocator_android:
     dependency: transitive
     description:
       name: geolocator_android
+<<<<<<< HEAD
+      sha256: fcb1760a50d7500deca37c9a666785c047139b5f9ee15aa5469fae7dbbe3170d
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.6.2"
+=======
       sha256: "86ea1654e4f61ff51466848e91c116b422d6010ea269fda0fbe1af7e9e742ce1"
       url: "https://pub.dev"
     source: hosted
     version: "5.0.3"
+>>>>>>> 0598ea71d6cfe6e98ad11eac5b6a9f73843d2b8e
   geolocator_apple:
     dependency: transitive
     description:
@@ -277,6 +294,8 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.14"
+<<<<<<< HEAD
+=======
   geolocator_linux:
     dependency: transitive
     description:
@@ -285,6 +304,7 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.6"
+>>>>>>> 0598ea71d6cfe6e98ad11eac5b6a9f73843d2b8e
   geolocator_platform_interface:
     dependency: transitive
     description:
@@ -297,10 +317,17 @@ packages:
     dependency: transitive
     description:
       name: geolocator_web
+<<<<<<< HEAD
+      sha256: "49d8f846ebeb5e2b6641fe477a7e97e5dd73f03cbfef3fd5c42177b7300fb0ed"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.0"
+=======
       sha256: "19e485a0f8d6a88abcf9c53cba3a4105e14b7435ed8ac1c108c067b938fe8429"
       url: "https://pub.dev"
     source: hosted
     version: "4.1.4"
+>>>>>>> 0598ea71d6cfe6e98ad11eac5b6a9f73843d2b8e
   geolocator_windows:
     dependency: transitive
     description:
@@ -309,6 +336,8 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.5"
+<<<<<<< HEAD
+=======
   gsettings:
     dependency: transitive
     description:
@@ -317,6 +346,7 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.8"
+>>>>>>> 0598ea71d6cfe6e98ad11eac5b6a9f73843d2b8e
   http:
     dependency: transitive
     description:
@@ -690,6 +720,16 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.1"
+<<<<<<< HEAD
+  wifi_iot:
+    dependency: "direct main"
+    description:
+      name: wifi_iot
+      sha256: "0861aed0c0afd6031b4337811d31cdd181c594a8a2c73e94826ea21d2cb4707b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.19+2"
+=======
   wifi_scan:
     dependency: "direct main"
     description:
@@ -706,6 +746,7 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.3.0"
+>>>>>>> 0598ea71d6cfe6e98ad11eac5b6a9f73843d2b8e
   xdg_directories:
     dependency: transitive
     description:

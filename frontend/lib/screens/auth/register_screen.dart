@@ -1,9 +1,7 @@
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
-import '../../models/user_model.dart';
 import '../../providers/auth_provider.dart';
+import '../home/home_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
@@ -18,8 +16,39 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController passwordController = TextEditingController();
   bool isPasswordVisible = false;
 
+  // returns which eye icon to show for the password field
+  IconData getPasswordIcon() {
+    if (isPasswordVisible == true) {
+      return Icons.visibility;
+    } else {
+      return Icons.visibility_off;
+    }
+  }
+
+  // returns spinner while loading, otherwise the button text
+  Widget buildRegisterButtonChild(bool isLoading) {
+    if (isLoading == true) {
+      return const SizedBox(
+        width: 20,
+        height: 20,
+        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+      );
+    } else {
+      return const Text(
+        "Create Account",
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    AuthProvider authProvider = Provider.of<AuthProvider>(context);
+
     return Scaffold(
       backgroundColor: const Color(0xFF0D0710),
       body: SafeArea(
@@ -90,7 +119,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                     const SizedBox(height: 14),
 
-
                     // email field
                     TextField(
                       controller: emailController,
@@ -124,12 +152,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           color: Colors.grey,
                         ),
                         suffixIcon: IconButton(
-                          icon: Icon(
-                            isPasswordVisible
-                                ? Icons.visibility
-                                : Icons.visibility_off,
-                            color: Colors.grey,
-                          ),
+                          icon: Icon(getPasswordIcon(), color: Colors.grey),
                           onPressed: () {
                             if (isPasswordVisible == true) {
                               setState(() {
@@ -151,6 +174,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                     ),
 
+                    // show error message if register failed
+                    if (authProvider.errorMessage != null) ...[
+                      const SizedBox(height: 10),
+                      Text(
+                        authProvider.errorMessage!,
+                        style: const TextStyle(
+                          color: Colors.redAccent,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
 
                     const SizedBox(height: 20),
                     SizedBox(
@@ -166,38 +200,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                         ),
                         onPressed: () async {
-                          print("Username: '${fullNameController.text}'");
-                          print("Email: '${emailController.text}'");
-                          print("Password: '${passwordController.text}'");
+                          // call the provider instead of Firebase directly
+                          bool success = await authProvider.register(
+                            fullNameController.text,
+                            emailController.text,
+                            passwordController.text,
+                          );
 
-                          print("Passed validation");
-
-                          try {
-                            UserModel user = UserModel(
-                              uid: '',
-                              username: fullNameController.text.trim(),
-                              email: emailController.text.trim(),
-                            );
-
-                            await context.read<AuthProvider>().register(
-                              user,
-                              passwordController.text,
-                            );
-
-                            if (!mounted) return;
-
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text("Account created successfully!"),
+                          if (success == true) {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const HomeScreen(),
                               ),
-                            );
-
-                            Navigator.pop(context);
-                          } catch (e) {
-                            if (!mounted) return;
-
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(e.toString())),
                             );
                           }
                         },
@@ -210,13 +225,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                           child: Container(
                             alignment: Alignment.center,
-                            child: const Text(
-                              "Create Account",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            child: buildRegisterButtonChild(
+                              authProvider.isLoading,
                             ),
                           ),
                         ),
